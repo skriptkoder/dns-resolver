@@ -1,2 +1,4 @@
 # dns-resolver
 DNS Information Gathering Tool
+
+It start by asking for a domain name ..once you enter it and Hit enter it will get the WHOIS information behind it (you can improve that part with more info if you need but the big picture is to get to know who is the Registrar: like godaddy or else) then it will check the hostname (most of the time this tell you who is hosting the site .. google, iweb, hostgator, sitepoint etc) then it goes to reach the DNS (DNS is like a phone book where it stores the ip or info for alle services related to your domain) .. A record for Address .. MX for Mail Exchanger. TXT for specific data etc etc .. Most of the time i have to use 3 different online services or at least 2-3 cmd line to achieve this. Next step will be to save the info. When you have to move/transfer a domain or migrate a web site this is plenny helpfull.
