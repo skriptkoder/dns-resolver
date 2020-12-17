@@ -193,7 +193,7 @@ lbl_query.pack(side=tk.LEFT)
 cb_queryType = Combobox(master=frame_ctrl_top, text='Query Type', width=10)
 cb_queryType['values'] = ('Any', 'A', 'CNAME', 'MX', 'NS', 'TXT')
 cb_queryType.current(0)
-cb_queryType.pack(side=tk.LEFT, padx=2)
+cb_queryType.pack(side=tk.LEFT, padx=(0, 2))
 
 # Buttons
 btn_search = Button(master=frame_ctrl_top, text="Search", width=6, command=search_command)
