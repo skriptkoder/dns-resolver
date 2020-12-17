@@ -143,7 +143,7 @@ window = tk.Tk()
 window.wm_title("DNS Resolver Tool")
 
 frame_domain_name = tk.Frame()
-frame_domain_name.pack(pady=5)
+frame_domain_name.pack(pady=(15, 5))
 
 frame_ctrl_top = tk.Frame(pady=5)
 frame_ctrl_top.pack()
