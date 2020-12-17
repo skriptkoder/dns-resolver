@@ -145,7 +145,7 @@ window.wm_title("DNS Resolver Tool")
 frame_domain_name = tk.Frame()
 frame_domain_name.pack(pady=5)
 
-frame_ctrl_top = tk.Frame(pady=5)
+frame_ctrl_top = tk.Frame(relief=tk.RAISED, pady=5)
 frame_ctrl_top.pack()
 
 frame_display = tk.Frame()
@@ -167,7 +167,7 @@ domainName_entry = tk.Entry(master=frame_domain_name, width=76, textvariable=dom
 domainName_entry.pack(side=tk.LEFT)
 domainName_entry.focus()
 
-lbl_whois = tk.Label(master=frame_ctrl_top, text="WHOIS:  ")
+lbl_whois = tk.Label(master=frame_ctrl_top, text="WHOIS: ")
 lbl_whois.pack(side=tk.LEFT)
 
 rdo_selected = IntVar()
@@ -177,7 +177,7 @@ rdo_yes.pack(side=tk.LEFT)
 rdo_no = tk.Radiobutton(master=frame_ctrl_top, text='no', value=2, variable=rdo_selected)
 rdo_no.pack(side=tk.LEFT)
 
-lbl_hostname = tk.Label(master=frame_ctrl_top, text="Hostname:  ")
+lbl_hostname = tk.Label(master=frame_ctrl_top, text="Hostname: ")
 lbl_hostname.pack(side=tk.LEFT)
 rdo_selected_host = IntVar()
 rdo_host_yes = tk.Radiobutton(master=frame_ctrl_top, text='yes', value=1, variable=rdo_selected_host)
@@ -187,21 +187,21 @@ rdo_host_no = tk.Radiobutton(master=frame_ctrl_top, text='no', value=2, variable
 rdo_host_no.pack(side=tk.LEFT)
 
 
-lbl_query = tk.Label(master=frame_ctrl_top, text="Query Type: ", width=13)
+lbl_query = tk.Label(master=frame_ctrl_top, text="Query Type:", width=13)
 lbl_query.pack(side=tk.LEFT)
 # combobox for Record Type
 cb_queryType = Combobox(master=frame_ctrl_top, text='Query Type', width=10)
 cb_queryType['values'] = ('Any', 'A', 'CNAME', 'MX', 'NS', 'TXT')
 cb_queryType.current(0)
-cb_queryType.pack(side=tk.LEFT)
+cb_queryType.pack(side=tk.LEFT, padx=2)
 
 # Buttons
 btn_search = Button(master=frame_ctrl_top, text="Search", width=6, command=search_command)
-btn_search.pack(side=tk.LEFT)
+btn_search.pack(side=tk.LEFT, padx=2)
 btn_reset = Button(master=frame_ctrl_top, text="Reset", width=6, command=reset_command)
-btn_reset.pack(side=tk.LEFT)
+btn_reset.pack(side=tk.LEFT, padx=2)
 btn_close = Button(master=frame_ctrl_top, text="Close", width=6, command=close_command)
-btn_close.pack(side=tk.LEFT)
+btn_close.pack(side=tk.LEFT, padx=2)
 
 # Labels
 lbl_result = tk.Label(master=frame_display, text="Result ", width=13)
