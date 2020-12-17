@@ -3,11 +3,18 @@ A program that search and store store domain name  dns
 Domain Name, A Records, MX Records, MX, CNAME, TXT
 """
 
+import tkinter as tk
 from tkinter import *
+from tkinter.ttk import *
 from tkinter import scrolledtext
 import dns.resolver
 import whois
 import socket
+from tkinter import filedialog
+
+
+def add_spacer():
+    displayResult.insert(END, '----------------------------------------\n')
 
 
 def is_registered(domain_name):
@@ -23,138 +30,189 @@ def is_registered(domain_name):
         return bool(w.domain_name)
 
 
-def loop_record(p_domain_name, p_record_type, p_msg,  p_error_msg):
-    _record = ''
+def get_whois(p_domain_name):
+    print('Retrieve WHOIS')
+    whois_info = whois.whois(p_domain_name)
+    displayResult.insert(END, 'Registrar: ')
+    displayResult.insert(END, whois_info.registrar)
+    displayResult.insert(END, '\n')
+    displayResult.insert(END, 'Expiration Date: ')
+    displayResult.insert(END, whois_info.expiration_date)
+    displayResult.insert(END, '\n')
+    add_spacer()
+
+
+def get_hostname(p_domain_name):
     try:
-        _record = dns.resolver.resolve(p_domain_name, p_record_type)
+        a_record = dns.resolver.resolve(p_domain_name, 'A')
     except dns.resolver.NoAnswer:
-        print(p_error_msg)
-    if _record:
-        for data_record in _record:
-            displayDNS.insert(END, p_msg)
-            displayDNS.insert(END, data_record)
-            displayDNS.insert(END, '\n')
-        displayDNS.insert(END, '----------------------------------------\n')
-    else:
-        displayDNS.insert(END, p_error_msg)
-        displayDNS.insert(END, '\n')
-    displayDNS.insert(END, '----------------------------------------\n')
+        print('No A record')
 
-
-def search_all_dns():
-
-    # clear all fields
-    displayRegistrar.delete(1.0, END)
-    displayHost.delete(1.0, END)
-    displayDNS.delete(1.0, END)
-    # todo: remove http https : ;; and trailing slash
-    # todo: is domain lock
-
-    displayRegistrar.configure(state='normal')
-    displayHost.configure(state='normal')
-    displayDNS.configure(state='normal')
-
-    domain_name = domainName_text.get()
-    if not domain_name:
-        displayRegistrar.insert(END, 'Please enter a domain name')
-        # displayRegistrar.insert(END, '\n')
-    elif not is_registered(domain_name):
-        displayRegistrar.insert(END, 'This domain is not registered')
-
-    else:
-        whois_info = whois.whois(domain_name)
-        displayRegistrar.insert(END, 'Registrar: ')
-        displayRegistrar.insert(END, whois_info.registrar)
-        displayRegistrar.insert(END, '\n')
-        displayRegistrar.insert(END, 'Expiration Date: ')
-        displayRegistrar.insert(END, whois_info.expiration_date)
-
-        # get the a record
-        try:
-            a_record = dns.resolver.resolve(domainName_text.get(), 'A')
-        except dns.resolver.NoAnswer:
-            print('No A record')
-        # prepend www to the domain name
-        try:
-            www_domain_name = 'www.' + domain_name
-        except dns.resolver.NoAnswer:
-            print('No WWW record')
-
+    if not a_record == '':
         # retrieve hostname by ip
         for a_data in a_record:
             str_a_record = str(a_data)
             hostname = socket.gethostbyaddr(str_a_record)
-            displayHost.insert(END, 'Hostname: ')
-            displayHost.insert(END, hostname[0])
-            displayHost.insert(END, '\n')
-        displayDNS.insert(END, '----------------------------------------\n')
-
-        # execute DNS query for most used type
-        loop_record(domain_name, 'NS', 'NS: ', 'No NS record')
-        loop_record(domain_name, 'A', 'A: ', 'No A record')
-        loop_record(domain_name, 'MX', 'MX: ', 'No MX record')
-        loop_record(domain_name, 'TXT', 'TXT: ', 'No TXT record')
-        loop_record(domain_name, 'CNAME', 'CNAME: ', 'No CNAME record')
-        loop_record(www_domain_name, 'CNAME', 'CNAME for www: ', 'No CNAME record for www')
+            displayResult.insert(END, 'Hostname: ')
+            displayResult.insert(END, hostname[0])
+            displayResult.insert(END, '\n')
+    else:
+        displayResult.insert(END, 'No A record for the Hostname: ')
+        displayResult.insert(END, '\n')
+    add_spacer()
 
 
-# Empty all fields
+def loop_record(p_domain_name, p_record_type):
+    _record = ''
+    try:
+        _record = dns.resolver.resolve(p_domain_name, p_record_type)
+    except dns.resolver.NoAnswer:
+        print('No', p_record_type, 'record')
+
+    if _record:
+        for data_record in _record:
+            displayResult.insert(END, p_record_type)
+            displayResult.insert(END, ': ')
+            displayResult.insert(END, data_record)
+            displayResult.insert(END, '\n')
+    else:
+        displayResult.insert(END, 'No', p_record_type, 'record')
+        displayResult.insert(END, '\n')
+    add_spacer()
+
+
+def search_command():
+
+    # clear results field
+    displayResult.delete(1.0, END)
+
+    domain_name = domainName_text.get()
+    if not domain_name:
+        displayResult.insert(END, 'Please enter a domain name')
+        # displayResult.insert(END, '\n')
+    elif not is_registered(domain_name):
+        displayResult.insert(END, 'This domain is not registered')
+    else:
+        print('Domain Name: ', domain_name)
+        # print('WHOIS: ', rdo_selected.get())
+        if rdo_selected.get() == 1:
+            get_whois(domain_name)
+        else:
+            print('Do not Query WHOIS')
+
+        if rdo_selected_host.get() == 1:
+            get_hostname(domain_name)
+        else:
+            print('Do not Query hostname')
+
+        # print('Query Type', cb_queryType.get())
+        record_type = cb_queryType.get()
+        if not record_type == 'Any':
+            print('Query Specific type', record_type)
+            loop_record(domain_name, record_type)
+        else:
+            print('Query all record type')
+            # displayResult.insert(END, 'Any')
+            all_record_type = ['NS', 'A', 'CNAME', 'MX', 'TXT']
+            for record_type in  all_record_type:
+                loop_record(domain_name, record_type)
+
+
 def reset_command():
-    displayRegistrar.delete(1.0, END)
-    displayHost.delete(1.0, END)
-    displayDNS.delete(1.0, END)
+    displayResult.delete(1.0, END)
     domainName_entry.delete(0, 'end')
+    cb_queryType.current(0)
+    rdo_yes.select()
 
 
-# Event to raise when hit Enter
-def callback(event):
-    search_all_dns()
-
-
-# Close button event for the main window
 def close_command():
     window.destroy()
 
 
-# Window and event settings
-window = Tk()
-window.geometry("880x500")
+def print_command():
+    f = filedialog.asksaveasfile(mode='w', initialfile='DNS-' + domainName_text.get() + '.txt',
+                                 filetypes=(("text files", "*.txt"), ("all files", "*.*")), defaultextension=".txt")
+    if f is None:  # asksaveasfile return `None` if dialog closed with "cancel".
+        return
+    text2save = str(displayResult.get(1.0, END))  # starts from `1.0`, not `0.0`
+    f.write(text2save)
+    f.close()  # `()` was missing.
+
+
+window = tk.Tk()
 window.wm_title("DNS Resolver Tool")
-window.bind('<Return>', callback)
+
+frame_domain_name = tk.Frame()
+frame_domain_name.pack(pady=5)
+
+frame_ctrl_top = tk.Frame(pady=5)
+frame_ctrl_top.pack()
+
+frame_display = tk.Frame()
+frame_display.pack()
+
+frame_ctrl_bottom = tk.Frame()
+frame_ctrl_bottom.pack(pady=10)
+
+# window.geometry("880x500")
+window.wm_title("DNS Resolver Tool")
 
 # Labels
-l1 = Label(window, text="Domain Name ")
-l1.grid(row=0, column=0)
-l2 = Label(window, text="Registrar ")
-l2.grid(row=1, column=0)
-l3 = Label(window, text="Hosting ")
-l3.grid(row=2, column=0)
-l4 = Label(window, text="DNS Records")
-l4.grid(row=3, column=0)
+lbl_domain_name = tk.Label(master=frame_domain_name, text="Domain Name ", width=13)
+lbl_domain_name.pack(side=tk.LEFT)
 
 # Domain name entry field
 domainName_text = StringVar()
-domainName_entry = Entry(window, width=75, textvariable=domainName_text, )
-domainName_entry.grid(row=0, column=1, columnspan=2)
+domainName_entry = tk.Entry(master=frame_domain_name, width=76, textvariable=domainName_text)
+domainName_entry.pack(side=tk.LEFT)
 domainName_entry.focus()
 
-# Registrar Display Section
-displayRegistrar = Text(window, height=2, width=60)
-displayRegistrar.grid(row=1, column=1, pady=10)
+lbl_whois = tk.Label(master=frame_ctrl_top, text="WHOIS:  ")
+lbl_whois.pack(side=tk.LEFT)
 
-# Host Display Section
-displayHost = Text(window, height=1, width=60)
-displayHost.grid(row=2, column=1, pady=10)
+rdo_selected = IntVar()
+rdo_yes = tk.Radiobutton(master=frame_ctrl_top, text='yes', value=1, variable=rdo_selected)
+rdo_yes.select()
+rdo_yes.pack(side=tk.LEFT)
+rdo_no = tk.Radiobutton(master=frame_ctrl_top, text='no', value=2, variable=rdo_selected)
+rdo_no.pack(side=tk.LEFT)
 
-# DNS Display Section
-displayDNS = scrolledtext.ScrolledText(window, height=18, width=58)
-displayDNS.grid(row=3, column=1)
+lbl_hostname = tk.Label(master=frame_ctrl_top, text="Hostname:  ")
+lbl_hostname.pack(side=tk.LEFT)
+rdo_selected_host = IntVar()
+rdo_host_yes = tk.Radiobutton(master=frame_ctrl_top, text='yes', value=1, variable=rdo_selected_host)
+rdo_host_yes.select()
+rdo_host_yes.pack(side=tk.LEFT)
+rdo_host_no = tk.Radiobutton(master=frame_ctrl_top, text='no', value=2, variable=rdo_selected_host)
+rdo_host_no.pack(side=tk.LEFT)
+
+
+lbl_query = tk.Label(master=frame_ctrl_top, text="Query Type: ", width=13)
+lbl_query.pack(side=tk.LEFT)
+# combobox for Record Type
+cb_queryType = Combobox(master=frame_ctrl_top, text='Query Type', width=10)
+cb_queryType['values'] = ('Any', 'A', 'CNAME', 'MX', 'NS', 'TXT')
+cb_queryType.current(0)
+cb_queryType.pack(side=tk.LEFT)
 
 # Buttons
-b1 = Button(window, text="Reset", width=8, command=reset_command)
-b1.grid(row=0, column=3, padx=10, pady=10)
-b2 = Button(window, text="Close", width=8, command=close_command)
-b2.grid(row=0, column=4, pady=10)
+btn_search = Button(master=frame_ctrl_top, text="Search", width=6, command=search_command)
+btn_search.pack(side=tk.LEFT)
+btn_reset = Button(master=frame_ctrl_top, text="Reset", width=6, command=reset_command)
+btn_reset.pack(side=tk.LEFT)
+btn_close = Button(master=frame_ctrl_top, text="Close", width=6, command=close_command)
+btn_close.pack(side=tk.LEFT)
+
+# Labels
+lbl_result = tk.Label(master=frame_display, text="Result ", width=13)
+lbl_result.pack(side=tk.LEFT)
+
+displayResult = tk.scrolledtext.ScrolledText(master=frame_display, height=15, width=60)
+displayResult.pack(side=tk.LEFT)
+
+btn_print_to_file = Button(master=frame_ctrl_bottom, text="Print Result to File", width=15, command=print_command)
+btn_print_to_file.pack(side=tk.RIGHT)
+
 
 # Run program
 window.mainloop()
