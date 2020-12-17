@@ -145,11 +145,11 @@ window.wm_title("DNS Resolver Tool")
 frame_domain_name = tk.Frame()
 frame_domain_name.pack(pady=5)
 
-frame_ctrl_top = tk.Frame(relief=tk.RAISED, pady=5)
+frame_ctrl_top = tk.Frame(pady=5)
 frame_ctrl_top.pack()
 
 frame_display = tk.Frame()
-frame_display.pack()
+frame_display.pack(pady=5)
 
 frame_ctrl_bottom = tk.Frame()
 frame_ctrl_bottom.pack(pady=10)
